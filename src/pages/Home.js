@@ -1,4 +1,6 @@
 import styled from "styled-components";
+import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBagShopping,
   faClapperboard,
@@ -8,7 +10,6 @@ import {
   faMedal,
   faMusic,
 } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFolder } from "@fortawesome/free-regular-svg-icons";
 import { useEffect, useState } from "react";
 import { getCategories, getVideos } from "../api/video";
@@ -21,6 +22,7 @@ const StyledAside = styled.aside`
   width: 70px;
   overflow-y: auto;
   height: 100%;
+
   &::-webkit-scrollbar {
     width: 10px;
   }
@@ -31,6 +33,7 @@ const StyledAside = styled.aside`
   &::-webkit-scrollbar-track {
     background-color: white;
   }
+
   a {
     display: block;
     text-align: center;
@@ -45,6 +48,7 @@ const StyledAside = styled.aside`
       font-size: 0.8rem;
     }
   }
+
   .aside-category,
   footer {
     display: none;
@@ -61,43 +65,51 @@ const MainContent = styled.div`
     height: 56px;
     z-index: 1;
     padding-left: 15px;
+
     a {
       background-color: #eee;
       padding: 5px 10px;
       border-radius: 5px;
       line-height: 56px;
       margin: 5px;
+
       &.active {
-        background-color: #000;
+        background-color: black;
         color: white;
       }
     }
   }
+
   section {
     padding-top: 56px;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+
     .video-content {
       display: block;
       width: 100%;
       max-width: 400px;
       margin: 10px;
       margin-top: 20px;
+
       video {
         border-radius: 15px;
         height: 220px;
         object-fit: cover;
       }
+
       .video-summary {
         display: flex;
         margin-top: 10px;
+
         img {
           width: 50px;
           height: 50px;
           border-radius: 50%;
           margin-right: 10px;
         }
+
         .video-desc {
           h3 {
             line-height: 1.4;
@@ -108,6 +120,7 @@ const MainContent = styled.div`
             -webkit-box-orient: vertical;
             -webkit-line-clamp: 2;
           }
+
           p {
             font-size: 0.9rem;
             color: #333;
@@ -118,9 +131,11 @@ const MainContent = styled.div`
     }
   }
 `;
+
 const StyledMain = styled.main`
   padding-top: 56px;
   display: flex;
+
   &.aside-change {
     aside {
       width: 70px;
@@ -134,6 +149,7 @@ const StyledMain = styled.main`
       .aside-category {
         display: none;
       }
+
       footer {
         display: none;
       }
@@ -142,28 +158,7 @@ const StyledMain = styled.main`
       padding-left: 70px;
     }
   }
-  @media screen and (min-width: 600px) {
-    .header-center {
-      justify-content: center;
-    }
-    .header-center input {
-      display: block;
-      padding: 10px 20px;
-      border: 1px solid #ddd;
-      width: 100%;
-      max-width: 600px;
-      border-top-left-radius: 50px;
-      border-bottom-left-radius: 50px;
-    }
-    .header-center button {
-      border: 1px solid #ddd;
-      border-left: none;
-      border-top-right-radius: 50px;
-      border-bottom-right-radius: 50px;
-      background-color: #eee;
-      padding: 7.5px 20px;
-    }
-  }
+
   @media screen and (min-width: 927px) {
     aside {
       display: block;
@@ -194,7 +189,6 @@ const StyledMain = styled.main`
       display: block;
     }
     .aside-category h2 {
-      margin: 20px;
       margin: 22px 22px 0;
     }
     footer {
@@ -210,16 +204,17 @@ const StyledMain = styled.main`
 const Home = () => {
   const [categories, setCategories] = useState([]);
   const [videos, setVideos] = useState([]);
-  const [ref, inView] = useInView();
   const [page, setPage] = useState(1);
   const [category, setCategory] = useState(null);
+
+  const [ref, inView] = useInView();
+
   const categoryAPI = async () => {
     const result = await getCategories();
     setCategories(result.data);
   };
+
   const videoAPI = async () => {
-    // database 연결해야 하는 부분 -> Spring + MyBatis(동적쿼리) / Spring Boot + JPA (JPQL, @Query)
-    // --> QueryDSL
     const result = await getVideos(page, category);
     console.log(result.data);
     setVideos([...videos, ...result.data]);
@@ -233,22 +228,26 @@ const Home = () => {
   useEffect(() => {
     categoryAPI();
     // videoAPI();
-    //     fetch("http://localhost:8080/api/category").then((response)=>
-    //     response.json()).then((json)=>{console.log(json);setCategories(json);
-    //   })
+    //fetch("http://localhost:8080/api/category")
+    //.then((response) => response.json())
+    //.then((json) => {
+    // console.log(json);
+    //setCategories(json);
+    //});
   }, []);
+
   useEffect(() => {
     if (inView) {
       console.log(`${inView} : 무한 스크롤 요청이 들어가야하는 부분!`);
-      setPage(page + 1);
       videoAPI();
+      setPage(page + 1);
     }
   }, [inView]);
 
   useEffect(() => {
     if (category != null) {
       console.log(category);
-      categoryFilterAPI();
+      videoAPI();
     }
   }, [category]);
 
@@ -258,6 +257,7 @@ const Home = () => {
     console.log(href[href.length - 1]);
     setCategory(parseInt(href[href.length - 1]));
     setPage(1);
+    setVideos([]);
   };
 
   return (
@@ -312,33 +312,75 @@ const Home = () => {
           ))}
         </nav>
         <section>
-          {videos.map((video) => (
-            <a href="#" className="video-content" key={video.videoCode}>
-              <video
-                width="100%"
-                poster={"/upload/" + video.videoPhoto}
-                autoPlay
-                loop
-                controls
-              >
-                <source src={"/upload/" + video.videoUrl} type="video/mp4" />
-              </video>
-              <div className="video-summary">
-                <img
-                  src={"/upload/" + video.channel.channelPhoto}
-                  alt="채널 이미지"
-                />
-                <div className="video-desc">
-                  <h3>{video.videoTitle}</h3>
-                  <p>{video.channel.channelName}</p>
-                  <p>
-                    조회수<span>{video.videoViews}</span>회 <span>1일</span> 전
-                  </p>
-                </div>
-              </div>
-            </a>
+          {videos.map((video, index) => (
+            <React.Fragment key={video.videoCode}>
+              {videos.length - 1 === index ? (
+                <a href="#" className="video-content" ref={ref}>
+                  {video.videoCode}
+                  <video
+                    width="100%"
+                    poster={"/upload/" + video.videoPhoto}
+                    autoPlay
+                    loop
+                    controls
+                  >
+                    <source
+                      src={"/upload/" + video.videoUrl}
+                      type="video/mp4"
+                    />
+                  </video>
+                  <div className="video-summary">
+                    <img
+                      src={"/upload/" + video.channel.channelPhoto}
+                      alt="채널이미지"
+                    />
+                    <div className="video-desc">
+                      <h3>{video.videoTitle}</h3>
+                      <p>{video.channel.channelName}</p>
+                      <p>
+                        조회수
+                        <span>{video.videoViews}</span>
+                        회ㆍ
+                        <span>1일</span>전
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              ) : (
+                <a href="#" className="video-content">
+                  {video.videoCode}
+                  <video
+                    width="100%"
+                    poster={"/upload/" + video.videoPhoto}
+                    autoPlay
+                    loop
+                    controls
+                  >
+                    <source
+                      src={"/upload/" + video.videoUrl}
+                      type="video/mp4"
+                    />
+                  </video>
+                  <div className="video-summary">
+                    <img
+                      src={"/upload/" + video.channel.channelPhoto}
+                      alt="채널이미지"
+                    />
+                    <div className="video-desc">
+                      <h3>{video.videoTitle}</h3>
+                      <p>{video.channel.channelName}</p>
+                      <p>
+                        조회수
+                        <span>{video.videoViews}</span>
+                        회ㆍ
+                        <span>1일</span>전
+                      </p>
+                    </div>
+                  </div>
+                </a>
+              )}
+            </React.Fragment>
           ))}
-          <div ref={ref}></div>
         </section>
       </MainContent>
     </StyledMain>
